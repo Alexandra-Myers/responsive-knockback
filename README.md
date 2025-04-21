@@ -1,25 +1,24 @@
-
-Installation information
+Responsive Knockback
 =======
+Put Simply:\
+Updates a mobs position immediately after it is hit.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+Technically:\
+Injects a call to `aiStep()` - which updates a mobs position based on its velocity - at the end of the `knockback` method within `LivingEntity`.
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+Problem
+=======
+When the server level runs a tick cycle, any mobs position is sent to clients on every 3rd chunk tick.\
+Velocity has an effect when entities are ticked - _after_ the chunks have been ticked.\
+This means that (ignoring the update rate) external forces applied to entities are delayed by one tick.
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+This matters because knockback is designed to be sent immediately with a flag called `hasImpulse` on the entity\
+bypassing the normal tri-tick broadcast rate of entity positions.\
+The thing is, when that flag is checked and triggers an immediate position update for players,\
+the velocity hasn't even had a chance to have an effect because entities, and as such their positions, are ticked after chunks.
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+
+So, bottom line is we tick the entity's position before the `hasImpulse` check and position broadcast to players.\
+It's hacky and suboptimal but works.\
+My spidey senses are telling me that there's a less hacky way of doing it.
