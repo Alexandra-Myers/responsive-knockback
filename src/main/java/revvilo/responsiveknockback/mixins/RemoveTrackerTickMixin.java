@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import revvilo.responsiveknockback.ResponsiveKnockback;
 
-@Mixin(value = ServerChunkCache.class, priority = 5000)
+@Mixin(value = ServerChunkCache.class, priority = 1)
 public class RemoveTrackerTickMixin {
 	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ChunkMap;tick()V"))
 	public void removeCall(ChunkMap instance, Operation<Void> original) {
